@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Sites</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container wide">
+  <h2>Managed Domains</h2>
+  <p class="hint">Only these domains will use proxy 195.209.210.144:28443. Other websites will open directly.</p>
+  <div class="row">
+    <input type="text" id="newDomain" placeholder="example.com">
+    <button id="addBtn">Add</button>
+  </div>
+  <ul id="domainList"></ul>
+  <div class="buttons">
+    <button id="addYoutubeBtn">Add YouTube set</button>
+    <button id="addOpenAiBtn">Add OpenAI set</button>
+    <button id="exportBtn">Export</button>
+    <button id="importBtn">Import</button>
+    <button id="resetBtn">Reset defaults</button>
+  </div>
+  <textarea id="jsonBox" placeholder="Import/export JSON appears here"></textarea>
+</div>
+<script src="options.js"></script>
+</body>
+</html>
