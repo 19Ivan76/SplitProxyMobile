@@ -1,42 +1,8 @@
-# Split Proxy Mobile 0.2
+# SplitProxyMobile 0.3.0
 
-Android-приложение направляет **только выбранные приложения** через существующий HTTP-прокси:
+- HTTP proxy remains fixed: `195.209.210.144:28443`, no authentication.
+- Fixes Android native loader failure reported as `NoClassDefFoundError`.
+- `libtun2proxy.so` is now opened with `dlopen`, so the app shows the real Android linker error if the device cannot load it.
+- Selected-app routing remains unchanged.
 
-- сервер: `195.209.210.144`
-- порт: `28443`
-- авторизация: отсутствует
-- серверную часть менять не требуется
-
-По умолчанию при первом запуске выбираются установленные Telegram, YouTube и ChatGPT. Другие приложения можно добавить галочками.
-
-## Ограничения
-
-HTTP-прокси передаёт TCP. UDP не проксируется: звонки Telegram не поддерживаются. QUIC блокируется внутри VPN, поэтому YouTube/ChatGPT должны переходить на HTTPS/TCP.
-
-## Сборка в Android Studio
-
-1. Открыть папку проекта.
-2. Установить Android SDK 35, CMake 3.22.1 и NDK 26.3.11579264.
-3. Запустить `assembleDebug` или нажать **Build APK**.
-
-При первой сборке Gradle автоматически скачает официальный `tun2proxy-android-libs.zip` версии 0.8.1 и положит библиотеки в `app/src/main/jniLibs`.
-
-Готовый debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
-
-## Сборка через GitHub Actions
-
-Добавьте проект в GitHub и запустите workflow **Build Android APK**. APK появится в Artifacts.
-
-## Основа
-
-Сетевой движок: `tun2proxy` (MIT), версия 0.8.1. Исходный принцип перенесён из браузерного расширения: фиксированный HTTP-прокси, а остальной трафик идёт напрямую.
-
-
-## Исправления 0.2
-
-- TUN оставлен неблокирующим для асинхронного tun2proxy.
-- Выбранные приложения передаются сервису напрямую через Intent.
-- IPv6 временно отключён; используется IPv4 и виртуальный DNS.
-- Перед запуском выполняется проверка HTTP CONNECT до ChatGPT.
-- В интерфейсе показывается реальная причина ошибки.
-- В уведомление добавлена кнопка «Отключить».
+The mobile operator must be able to establish TCP/CONNECT to `195.209.210.144:28443`. A timeout before the VPN engine starts is a network/server reachability problem, not a TUN problem.

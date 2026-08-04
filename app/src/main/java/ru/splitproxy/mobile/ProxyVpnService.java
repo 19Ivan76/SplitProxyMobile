@@ -128,7 +128,7 @@ public final class ProxyVpnService extends VpnService {
                 result = NativeBridge.run(command, ProxyConfig.MTU);
             } catch (Throwable error) {
                 Log.e(TAG, "Native engine failed", error);
-                throw new IllegalStateException("Ошибка запуска движка: " + error.getClass().getSimpleName());
+                throw new IllegalStateException("Ошибка запуска движка: " + describeError(error), error);
             }
 
             if (RUNNING.get()) {
@@ -168,6 +168,19 @@ public final class ProxyVpnService extends VpnService {
         } catch (java.net.SocketTimeoutException e) {
             throw new IllegalStateException("Прокси недоступен: тайм-аут");
         }
+    }
+
+    private static String describeError(Throwable error) {
+        Throwable current = error;
+        String best = null;
+        int depth = 0;
+        while (current != null && depth++ < 8) {
+            String message = current.getMessage();
+            if (message != null && !message.trim().isEmpty()) best = message.trim();
+            current = current.getCause();
+        }
+        if (best != null) return best;
+        return error.getClass().getName();
     }
 
     private synchronized void stopTunnel() {
