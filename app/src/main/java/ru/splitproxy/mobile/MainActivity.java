@@ -148,7 +148,10 @@ public final class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Выберите хотя бы одно приложение", Toast.LENGTH_SHORT).show();
             return;
         }
-        SelectionStore.save(this, selectedPackages);
+        if (!SelectionStore.save(this, selectedPackages)) {
+            Toast.makeText(this, "Не удалось сохранить список приложений", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent permission = VpnService.prepare(this);
         if (permission != null) {
             startActivityForResult(permission, VPN_REQUEST);
@@ -168,6 +171,7 @@ public final class MainActivity extends AppCompatActivity {
     private void startProxyService() {
         Intent intent = new Intent(this, ProxyVpnService.class);
         intent.setAction(ProxyVpnService.ACTION_START);
+        intent.putStringArrayListExtra(ProxyVpnService.EXTRA_PACKAGES, new ArrayList<>(selectedPackages));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent);
         else startService(intent);
         status.postDelayed(this::updateStatus, 500);
@@ -187,11 +191,20 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void updateStatus() {
-        boolean running = ProxyStateStore.isRunning(this);
-        status.setText(running ? "VPN включён — остановите для изменения списка" : "VPN выключен");
-        adapter.setLocked(running);
-        startButton.setEnabled(!running && !selectedPackages.isEmpty());
-        stopButton.setEnabled(running);
+        ProxyStateStore.State state = ProxyStateStore.read(this);
+        boolean active = state.isActive();
+        if (ProxyStateStore.RUNNING.equals(state.name)) {
+            status.setText("VPN включён — " + state.message);
+        } else if (ProxyStateStore.STARTING.equals(state.name)) {
+            status.setText(state.message);
+        } else if (ProxyStateStore.ERROR.equals(state.name)) {
+            status.setText("Ошибка: " + state.message);
+        } else {
+            status.setText("VPN выключен");
+        }
+        adapter.setLocked(active);
+        startButton.setEnabled(!active && !selectedPackages.isEmpty());
+        stopButton.setEnabled(active);
     }
 
     private void updateButtons() {

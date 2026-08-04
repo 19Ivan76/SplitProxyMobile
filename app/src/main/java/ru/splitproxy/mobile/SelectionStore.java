@@ -18,12 +18,13 @@ public final class SelectionStore {
         return new HashSet<>(prefs.getStringSet(KEY_PACKAGES, new HashSet<>()));
     }
 
-    public static void save(Context context, Set<String> packages) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    public static boolean save(Context context, Set<String> packages) {
+        // commit(), а не apply(): VPN-сервис работает в отдельном процессе.
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit()
                 .putStringSet(KEY_PACKAGES, new HashSet<>(packages))
                 .putBoolean(KEY_INITIALIZED, true)
-                .apply();
+                .commit();
     }
 
     public static boolean isInitialized(Context context) {
